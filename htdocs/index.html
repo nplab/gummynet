@@ -82,8 +82,8 @@
             <div class="col-md-1">PLR</div>
             <div class="col-md-2">
                 <div class="btn-group" role="group" aria-label="...">
-                    <button id="btn-p1-plr-down" type="button" class="btn btn-default btn-xs">- 5ms</button>
-                    <button id="btn-p1-plr-up" type="button" class="btn btn-default btn-xs">+ 5ms</button>
+                    <button id="btn-p1-plr-down" type="button" class="btn btn-default btn-xs">- 1%</button>
+                    <button id="btn-p1-plr-up" type="button" class="btn btn-default btn-xs">+ 2%</button>
                 </div>
             </div>
             <div class="col-md-9">
@@ -133,14 +133,14 @@
 
 
     var p1Delay = 10;
-    var p1Plr = 1;
-    var p1Bw = 10;
+    var p1Plr = 0;
+    var p1Bw = 50;
 
     var p2Delay = 0;
     var p2Plr = 0;
     var p2Bw = 0;
 
-    var ipfwInterface = "igb2";
+    var ipfwInterface = "vlan21";
 
     var socket;
 
@@ -202,7 +202,8 @@
         sendCommand('sudo ipfw flush');
         addRule = "sudo ipfw -q add "
 
-        sendCommand("sudo ipfw add 1100 pipe 1 ip from any to any via igb2")
+        sendCommand("sudo ipfw add 1111 pipe 1 ip from any to any in via vlan21")
+        sendCommand("sudo ipfw add 1112 pipe 1 ip from any to any in via vlan22")
 
         // check for the protocols
         if ($('#cbTcp4').bootstrapSwitch('state') == false) {
