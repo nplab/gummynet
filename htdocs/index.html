@@ -140,8 +140,8 @@
     var p2Plr = 0;
     var p2Bw = 0;
 
-    var ipfwInterface = "vlan21";
-
+    var ipfwInterface1 = "vlan21";
+    var ipfwInterface2 = "vlan22";
     var socket;
 
     function sendCommand(command) {
@@ -207,27 +207,33 @@
 
         // check for the protocols
         if ($('#cbTcp4').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1001 deny ip4 from any to any proto tcp via " + ipfwInterface);
+            sendCommand(addRule + "1001 deny ip4 from any to any proto tcp via " + ipfwInterface1);
+            sendCommand(addRule + "1001 deny ip4 from any to any proto tcp via " + ipfwInterface2);
         }
 
         if ($('#cbTcp6').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1002 deny ip6 from any to any proto tcp via " + ipfwInterface);
+            sendCommand(addRule + "1002 deny ip6 from any to any proto tcp via " + ipfwInterface1);
+            sendCommand(addRule + "1002 deny ip6 from any to any proto tcp via " + ipfwInterface2);
         }
 
         if ($('#cbUdp4').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1003 deny ip4 from any to any proto udp via " + ipfwInterface);
+            sendCommand(addRule + "1003 deny ip4 from any to any proto udp via " + ipfwInterface1);
+            sendCommand(addRule + "1003 deny ip4 from any to any proto udp via " + ipfwInterface2);
         }
 
         if ($('#cbUdp6').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1004 deny ip6 from any to any proto udp via " + ipfwInterface);
+            sendCommand(addRule + "1004 deny ip6 from any to any proto udp via " + ipfwInterface1);
+            sendCommand(addRule + "1004 deny ip6 from any to any proto udp via " + ipfwInterface2);
         }
 
         if ($('#cbSctp4').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1005 deny ip4 from any to any proto sctp via " + ipfwInterface);
+            sendCommand(addRule + "1005 deny ip4 from any to any proto sctp via " + ipfwInterface1);
+            sendCommand(addRule + "1005 deny ip4 from any to any proto sctp via " + ipfwInterface2);
         }
 
         if ($('#cbSctp6').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1006 deny ip6 from any to any proto sctp via " + ipfwInterface);
+            sendCommand(addRule + "1006 deny ip6 from any to any proto sctp via " + ipfwInterface1);
+            sendCommand(addRule + "1006 deny ip6 from any to any proto sctp via " + ipfwInterface2);
         }
 
         //sendCommand("sudo ipfw show && sudo ipfw pipe 1 show");
