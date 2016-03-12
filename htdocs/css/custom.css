@@ -15,3 +15,12 @@ h2 {
 h3 {
     font-size: 22px;
 }
+
+.navbar-brand {
+    font-size: 26px;
+}
+
+.navbar-brand > .glyphicon {
+    color: #409AD2;
+    font-size: 22px;
+}

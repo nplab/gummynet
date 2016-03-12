@@ -26,13 +26,7 @@
     <nav class="navbar navbar-default navbar-static-top">
         <div class="container">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-                <a class="navbar-brand">Happy BlueBox</a>
+                <a class="navbar-brand">Happy BlueBox <span class="glyphicon glyphicon-random" aria-hidden="true"></span></a>
             </div>
         </div>
     </nav>
@@ -64,6 +58,7 @@
                 </table>
             </div>
 
+<!--
             <div class="col-md-1">Delay</div>
             <div class="col-md-2">
                 <div class="btn-group" role="group" aria-label="...">
@@ -109,6 +104,7 @@
                 </div>
             </div>
         </div>
+-->
 
         <div class="row">
             <div class="col-md-12">
@@ -131,7 +127,6 @@
     var plrMax = 5; // %
     var bwMax = 100; // mbit
 
-
     var p1Delay = 10;
     var p1Plr = 0;
     var p1Bw = 50;
@@ -153,14 +148,15 @@
 
     }
 
+    function updateDummynet() {
+
+    }
+
     function updateAll() {
 
+        /*
         var addRule = "";
         var pipeString = "";
-
-        /*
-         * PIPE 1
-         */
 
         if (p1Delay < 0) {
             p1Delay = 0;
@@ -195,16 +191,16 @@
         $('.p1BwPb').css('width', Math.ceil(p1Bw / bwMax * 100) + '%');
         $('.p1BwPb').html(p1Bw + ' Mbit');
 
+        */
 
-
-        /*
-         * IPFW part
-         */
+        // IPFW
         sendCommand('sudo ipfw flush');
         addRule = "sudo ipfw -q add "
 
+        /*
         sendCommand("sudo ipfw add 1111 pipe 1 ip from any to any in via vlan21")
         sendCommand("sudo ipfw add 1112 pipe 1 ip from any to any in via vlan22")
+        */
 
         // check for the protocols
         if ($('#cbTcp4').bootstrapSwitch('state') == false) {
@@ -237,14 +233,14 @@
             sendCommand(addRule + "1006 deny ip6 from any to any proto sctp via " + ipfwInterface2);
         }
 
-        //sendCommand("sudo ipfw show && sudo ipfw pipe 1 show");
-        //console.log("sldkjflksjdlfkjsdlkfjlskdjfljsdlkfjlsdkf");
-
+        /*
         pipeString = "sudo ipfw pipe 1 config delay " + p1Delay + "ms plr " + (p1Plr / 100).toFixed(2) + " bw " + p1Bw + "Mbits/s";
         sendCommand(pipeString);
         console.log(pipeString);
+        */
 
-        sendCommand("sudo ipfw show && sudo ipfw pipe 1 show");
+        //sendCommand("sudo ipfw show && sudo ipfw pipe 1 show");
+        sendCommand("sudo ipfw show");
     }
 
 
@@ -329,7 +325,7 @@
                 socket.emit('shell', {
                     command: command
                 });
-                return false; //<---- Add this line
+                return false;
             }
         });
 
