@@ -1,0 +1,9 @@
+{
+    "name": "Gummynet",
+    "description": "Dummynet Webinterface ",
+    "author": "Felix Weinrank - NPLAB FH-Muenster",
+    "dependencies" : {
+        "express": "*",
+        "socket.io": "*"
+      }
+}
