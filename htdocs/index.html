@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Happy BlueBox">
+    <meta name="author" content="Felix Weinrank">
+
+    <title>Happy BlueBox</title>
+
+    <!-- CSS Section -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/bootstrap-switch.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+
+    <!-- JAVSCRIPT Section -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-switch.min.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+                <a class="navbar-brand">Happy BlueBox</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table">
+                    <tr>
+                        <th>Protocol</th>
+                        <th>IPv4</th>
+                        <th>IPv6</th>
+                    </tr>
+                    <tr>
+                        <td>TCP</td>
+                        <td><input type="checkbox" class="checkboxProtocol" id="cbTcp4" checked></td>
+                        <td><input type="checkbox" class="checkboxProtocol" id="cbTcp6" checked></td>
+                    </tr>
+                    <tr>
+                        <td>UDP</td>
+                        <td><input type="checkbox" class="checkboxProtocol" id="cbUdp4" checked></td>
+                        <td><input type="checkbox" class="checkboxProtocol" id="cbUdp6" checked></td>
+                    </tr>
+                    <tr>
+                        <td>SCTP</td>
+                        <td><input type="checkbox" class="checkboxProtocol" id="cbSctp4" checked></td>
+                        <td><input type="checkbox" class="checkboxProtocol" id="cbSctp6" checked></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="col-md-1">Delay</div>
+            <div class="col-md-2">
+                <div class="btn-group" role="group" aria-label="...">
+                    <button id="btn-p1-delay-down" type="button" class="btn btn-default btn-xs">- 5ms</button>
+                    <button id="btn-p1-delay-up" type="button" class="btn btn-default btn-xs">+ 5ms</button>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped active p1DelayPb" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+                        10ms
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-1">PLR</div>
+            <div class="col-md-2">
+                <div class="btn-group" role="group" aria-label="...">
+                    <button id="btn-p1-plr-down" type="button" class="btn btn-default btn-xs">- 5ms</button>
+                    <button id="btn-p1-plr-up" type="button" class="btn btn-default btn-xs">+ 5ms</button>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped active p1PlrPb" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+                        10ms
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-1">Bandwidth</div>
+            <div class="col-md-2">
+                <div class="btn-group" role="group" aria-label="...">
+                    <button id="btn-p1-bw-down" type="button" class="btn btn-default btn-xs">- 1Mbit</button>
+                    <button id="btn-p1-bw-up" type="button" class="btn btn-default btn-xs">+ 1Mbit</button>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped active p1BwPb" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+                        10ms
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="inputShell">Shell command</label>
+                    <input type="text" class="form-control" id="inputShell" placeholder="command">
+                </div>
+                <pre id="stdout">
+          </pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer text-center">
+        &copy; Network Programming Lab of Münster University of Applied Sciences - Felix Weinrank - weinrank@fh-muenster.de - <a href="https://github.com/nplab/">@GitHub</a>
+    </div>
+</body>
+<script>
+    var delayMax = 100; // ms
+    var plrMax = 5; // %
+    var bwMax = 100; // mbit
+
+
+    var p1Delay = 10;
+    var p1Plr = 1;
+    var p1Bw = 10;
+
+    var p2Delay = 0;
+    var p2Plr = 0;
+    var p2Bw = 0;
+
+    var ipfwInterface = "igb2";
+
+    var socket;
+
+    function sendCommand(command) {
+        console.log("sending: " + command);
+        socket.emit('shell', {
+            command: command
+        });
+
+    }
+
+    function updateAll() {
+
+        var addRule = "";
+        var pipeString = "";
+
+        /*
+         * PIPE 1
+         */
+
+        if (p1Delay < 0) {
+            p1Delay = 0;
+        }
+
+        if (p1Delay > delayMax) {
+            p1Delay = delayMax;
+        }
+
+        if (p1Plr < 0) {
+            p1Plr = 0;
+        }
+
+        if (p1Plr > plrMax) {
+            p1Plr = plrMax;
+        }
+
+        if (p1Bw < 1) {
+            p1Bw = 1;
+        }
+
+        if (p1Bw > bwMax) {
+            p1Bw = bwMax;
+        }
+
+        $('.p1DelayPb').css('width', Math.ceil(p1Delay / delayMax * 100) + '%');
+        $('.p1DelayPb').html(p1Delay + ' ms');
+
+        $('.p1PlrPb').css('width', Math.ceil(p1Plr / plrMax * 100) + '%');
+        $('.p1PlrPb').html(p1Plr + '%');
+
+        $('.p1BwPb').css('width', Math.ceil(p1Bw / bwMax * 100) + '%');
+        $('.p1BwPb').html(p1Bw + ' Mbit');
+
+
+
+        /*
+         * IPFW part
+         */
+        sendCommand('sudo ipfw flush');
+        addRule = "sudo ipfw -q add "
+
+        sendCommand("sudo ipfw add 1100 pipe 1 ip from any to any via igb2")
+
+        // check for the protocols
+        if ($('#cbTcp4').bootstrapSwitch('state') == false) {
+            sendCommand(addRule + "1001 deny ip4 from any to any proto tcp via " + ipfwInterface);
+        }
+
+        if ($('#cbTcp6').bootstrapSwitch('state') == false) {
+            sendCommand(addRule + "1002 deny ip6 from any to any proto tcp via " + ipfwInterface);
+        }
+
+        if ($('#cbUdp4').bootstrapSwitch('state') == false) {
+            sendCommand(addRule + "1003 deny ip4 from any to any proto udp via " + ipfwInterface);
+        }
+
+        if ($('#cbUdp6').bootstrapSwitch('state') == false) {
+            sendCommand(addRule + "1004 deny ip6 from any to any proto udp via " + ipfwInterface);
+        }
+
+        if ($('#cbSctp4').bootstrapSwitch('state') == false) {
+            sendCommand(addRule + "1005 deny ip4 from any to any proto sctp via " + ipfwInterface);
+        }
+
+        if ($('#cbSctp6').bootstrapSwitch('state') == false) {
+            sendCommand(addRule + "1006 deny ip6 from any to any proto sctp via " + ipfwInterface);
+        }
+
+        //sendCommand("sudo ipfw show && sudo ipfw pipe 1 show");
+        //console.log("sldkjflksjdlfkjsdlkfjlskdjfljsdlkfjlsdkf");
+
+        pipeString = "sudo ipfw pipe 1 config delay " + p1Delay + "ms plr " + (p1Plr / 100).toFixed(2) + " bw " + p1Bw + "Mbits/s";
+        sendCommand(pipeString);
+        console.log(pipeString);
+
+        sendCommand("sudo ipfw show && sudo ipfw pipe 1 show");
+    }
+
+
+    $(document).ready(function() {
+        console.log("document loaded");
+
+        /*
+         * SOCKET.IO
+         */
+
+        socket = io.connect();
+
+        socket.on('control', function(data) {
+            console.log('got message');
+            console.log(data);
+        });
+
+        socket.on('shell', function(data) {
+            console.log('shell response');
+            console.log(data);
+            $('#stdout').html(data.stdout);
+        });
+
+        /*
+         * BOOTSTRAP SWITCH
+         */
+
+        $.fn.bootstrapSwitch.defaults.size = 'mini';
+        $.fn.bootstrapSwitch.defaults.onColor = 'success';
+        $.fn.bootstrapSwitch.defaults.offColor = 'danger';
+
+        $(".checkboxProtocol").bootstrapSwitch();
+
+        $(".checkboxProtocol").on('switchChange.bootstrapSwitch', function(event, state) {
+            updateAll();
+        });
+
+        updateAll();
+
+        $('#btn-p1-delay-up').click(function() {
+            console.log('p1 - delay up');
+            p1Delay = p1Delay + 5;
+            updateAll();
+        });
+
+        $('#btn-p1-delay-down').click(function() {
+            console.log('p1 - delay down');
+            p1Delay = p1Delay - 5;
+            updateAll();
+        });
+
+        $('#btn-p1-plr-up').click(function() {
+            console.log('p1 - plr up');
+            p1Plr = p1Plr + 1;
+            updateAll();
+        });
+
+        $('#btn-p1-plr-down').click(function() {
+            console.log('p1 - delay down');
+            p1Plr = p1Plr - 1;
+            updateAll();
+        });
+
+        $('#btn-p1-bw-up').click(function() {
+            console.log('p1 - bw up');
+            p1Bw = p1Bw + 1;
+            updateAll();
+        });
+
+        $('#btn-p1-bw-down').click(function() {
+            console.log('p1 - bw down');
+            p1Bw = p1Bw - 1;
+            updateAll();
+        });
+
+        $('#inputShell').keypress(function(e) {
+            if (e.which == 13) {
+                var command = $(this).val();
+
+                console.log('pressed enter');
+                console.log(command);
+                socket.emit('shell', {
+                    command: command
+                });
+                return false; //<---- Add this line
+            }
+        });
+
+
+    });
+</script>
+
+</html>
