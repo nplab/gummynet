@@ -82,13 +82,8 @@
             <div class="col-md-1">PLR</div>
             <div class="col-md-2">
                 <div class="btn-group" role="group" aria-label="...">
-<<<<<<< HEAD
                     <button id="btn-p1-plr-down" type="button" class="btn btn-default btn-xs">- 1%</button>
                     <button id="btn-p1-plr-up" type="button" class="btn btn-default btn-xs">+ 2%</button>
-=======
-                    <button id="btn-p1-plr-down" type="button" class="btn btn-default btn-xs">- 5ms</button>
-                    <button id="btn-p1-plr-up" type="button" class="btn btn-default btn-xs">+ 5ms</button>
->>>>>>> 448f33396a0a24b0d51dac2580d80109526213a8
                 </div>
             </div>
             <div class="col-md-9">
@@ -138,25 +133,16 @@
 
 
     var p1Delay = 10;
-<<<<<<< HEAD
     var p1Plr = 0;
     var p1Bw = 50;
-=======
-    var p1Plr = 1;
-    var p1Bw = 10;
->>>>>>> 448f33396a0a24b0d51dac2580d80109526213a8
 
     var p2Delay = 0;
     var p2Plr = 0;
     var p2Bw = 0;
 
-<<<<<<< HEAD
     var ipfwInterface1 = "vlan21";
     var ipfwInterface2 = "vlan22";
-=======
-    var ipfwInterface = "igb2";
 
->>>>>>> 448f33396a0a24b0d51dac2580d80109526213a8
     var socket;
 
     function sendCommand(command) {
@@ -217,7 +203,6 @@
         sendCommand('sudo ipfw flush');
         addRule = "sudo ipfw -q add "
 
-<<<<<<< HEAD
         sendCommand("sudo ipfw add 1111 pipe 1 ip from any to any in via vlan21")
         sendCommand("sudo ipfw add 1112 pipe 1 ip from any to any in via vlan22")
 
@@ -250,33 +235,6 @@
         if ($('#cbSctp6').bootstrapSwitch('state') == false) {
             sendCommand(addRule + "1006 deny ip6 from any to any proto sctp via " + ipfwInterface1);
             sendCommand(addRule + "1006 deny ip6 from any to any proto sctp via " + ipfwInterface2);
-=======
-        sendCommand("sudo ipfw add 1100 pipe 1 ip from any to any via igb2")
-
-        // check for the protocols
-        if ($('#cbTcp4').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1001 deny ip4 from any to any proto tcp via " + ipfwInterface);
-        }
-
-        if ($('#cbTcp6').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1002 deny ip6 from any to any proto tcp via " + ipfwInterface);
-        }
-
-        if ($('#cbUdp4').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1003 deny ip4 from any to any proto udp via " + ipfwInterface);
-        }
-
-        if ($('#cbUdp6').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1004 deny ip6 from any to any proto udp via " + ipfwInterface);
-        }
-
-        if ($('#cbSctp4').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1005 deny ip4 from any to any proto sctp via " + ipfwInterface);
-        }
-
-        if ($('#cbSctp6').bootstrapSwitch('state') == false) {
-            sendCommand(addRule + "1006 deny ip6 from any to any proto sctp via " + ipfwInterface);
->>>>>>> 448f33396a0a24b0d51dac2580d80109526213a8
         }
 
         //sendCommand("sudo ipfw show && sudo ipfw pipe 1 show");
